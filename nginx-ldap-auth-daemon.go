@@ -27,19 +27,16 @@ var options = &struct {
 }
 
 func ladpAuth(username string, password string) bool {
-	var l *ldap.Conn
-	var err error
-
-	l, err = ldap.DialTLS("tcp", options.ldapserver, &tls.Config{InsecureSkipVerify: true})
+	l, err := ldap.DialTLS("tcp", options.ldapserver, &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		log.Printf("connecting ldap server failed: %s\n", err)
 		return false
 	}
 
-	err = l.Bind(options.binddn, options.bindpw)
+	bindErr := l.Bind(options.binddn, options.bindpw)
 
-	if err != nil {
-		log.Printf("bind failed: %s\n", err)
+	if bindErr != nil {
+		log.Printf("bind failed: %s", bindErr)
 		return false
 	}
 
@@ -163,6 +160,17 @@ func mergeConfigToOptions(config map[string]string) {
 			options.filter = value
 		} else {
 			log.Fatal("filter is required")
+		}
+	}
+
+	if options.binddn == "" {
+		if value, ok := config["binddn"]; ok {
+			options.binddn = value
+		}
+	}
+	if options.bindpw == "" {
+		if value, ok := config["bindpw"]; ok {
+			options.bindpw = value
 		}
 	}
 }
