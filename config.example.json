@@ -5,7 +5,5 @@
     "bindpw": "123456",
     "filter": "(sAMAccountName=%s)",
     "host": "127.0.0.1",
-    "port": 8080,
-    "useSSL": true,
-    "insecureSkipVerify": false
+    "port": 8080
 }
