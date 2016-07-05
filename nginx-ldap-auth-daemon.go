@@ -22,13 +22,22 @@ var options = &struct {
 	binddn             string
 	bindpw             string
 	filter             string
+	useSSL             bool
 	insecureSkipVerify bool
 }{
 	configArg: "config.json",
 }
 
 func ladpAuth(username string, password string) bool {
-	l, err := ldap.DialTLS("tcp", options.ldapserver, &tls.Config{InsecureSkipVerify: options.insecureSkipVerify})
+	var l *ldap.Conn
+	var err error
+
+	if options.useSSL {
+		l, err = ldap.DialTLS("tcp", options.ldapserver, &tls.Config{InsecureSkipVerify: options.insecureSkipVerify})
+	} else {
+		l, err = ldap.Dial("tcp", options.ldapserver)
+	}
+
 	if err != nil {
 		log.Printf("connecting ldap server failed: %s\n", err)
 		return false
@@ -130,7 +139,8 @@ func init() {
 	flag.StringVar(&options.binddn, "binddn", "", "required if search action need bind first")
 	flag.StringVar(&options.bindpw, "bindpw", "", "required if search action need bind first")
 	flag.StringVar(&options.filter, "filter", "", "required. filter template, such as (sAMAccountName=%s)")
-	flag.BoolVar(&options.insecureSkipVerify, "insecureSkipVerify", false, "if skip verity when ldap server cert is not insecure")
+	flag.BoolVar(&options.useSSL, "useSSL", true, "if use SSL. default true")
+	flag.BoolVar(&options.insecureSkipVerify, "insecureSkipVerify", false, "if skip verity when ldap server cert is not insecure. default false")
 }
 
 func mergeConfigToOptions(config map[string]string) {
@@ -166,6 +176,17 @@ func mergeConfigToOptions(config map[string]string) {
 	if options.bindpw == "" {
 		if value, ok := config["bindpw"]; ok {
 			options.bindpw = value
+		}
+	}
+
+	if options.useSSL == "" {
+		if value, ok := config["useSSL"]; ok {
+			options.useSSL = value
+		}
+	}
+	if options.insecureSkipVerify == "" {
+		if value, ok := config["insecureSkipVerify"]; ok {
+			options.insecureSkipVerify = value
 		}
 	}
 }

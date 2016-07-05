@@ -1,9 +1,11 @@
 {
-    "ldapserver":"cn1.global.ctrip.com:3269",
-    "basedn":"DC=cn,DC=global,DC=corp,DC=com",
-    "binddn":"CN=apiuser,OU=User,OU=OPS,OU=Sh,DC=cn,DC=global,DC=corp,DC=com",
-    "bindpw":"123456",
-    "filter":"(sAMAccountName=%s)",
+    "ldapserver": "cn1.global.ctrip.com:696",
+    "basedn": "DC=cn,DC=global,DC=corp,DC=com",
+    "binddn": "CN=apiuser,OU=User,OU=OPS,OU=Sh,DC=cn,DC=global,DC=corp,DC=com",
+    "bindpw": "123456",
+    "filter": "(sAMAccountName=%s)",
     "host": "127.0.0.1",
-    "port": 8080
+    "port": 8080,
+    "useSSL": true,
+    "insecureSkipVerify": false
 }
