@@ -141,10 +141,10 @@ func init() {
 	flag.BoolVar(&options.insecureSkipVerify, "insecureSkipVerify", false, "if skip verity when ldap server cert is not insecure. default false")
 }
 
-func mergeConfigToOptions(config map[string]string) {
+func mergeConfigToOptions(config map[string]interface{}) {
 	if options.ldapserver == "" {
 		if value, ok := config["ldapserver"]; ok {
-			options.ldapserver = value
+			options.ldapserver = value.(string)
 		} else {
 			flag.PrintDefaults()
 			log.Fatal("ldapserver is required")
@@ -153,7 +153,7 @@ func mergeConfigToOptions(config map[string]string) {
 
 	if options.basedn == "" {
 		if value, ok := config["basedn"]; ok {
-			options.basedn = value
+			options.basedn = value.(string)
 		} else {
 			flag.PrintDefaults()
 			log.Fatal("basedn is required")
@@ -162,7 +162,7 @@ func mergeConfigToOptions(config map[string]string) {
 
 	if options.filter == "" {
 		if value, ok := config["filter"]; ok {
-			options.filter = value
+			options.filter = value.(string)
 		} else {
 			flag.PrintDefaults()
 			log.Fatal("filter is required")
@@ -171,12 +171,12 @@ func mergeConfigToOptions(config map[string]string) {
 
 	if options.binddn == "" {
 		if value, ok := config["binddn"]; ok {
-			options.binddn = value
+			options.binddn = value.(string)
 		}
 	}
 	if options.bindpw == "" {
 		if value, ok := config["bindpw"]; ok {
-			options.bindpw = value
+			options.bindpw = value.(string)
 		}
 	}
 }
@@ -185,7 +185,7 @@ func main() {
 	flag.Parse()
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
 
-	config := map[string]string{}
+	config := map[string]interface{}{}
 	if options.configArg != "" {
 		configValue, err := ioutil.ReadFile(options.configArg)
 		if err != nil {
