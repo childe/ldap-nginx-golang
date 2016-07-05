@@ -14,32 +14,40 @@ import (
 )
 
 var options = &struct {
-	configArg string
+	configArg  string
+	host       string
+	port       int
+	ldapserver string
+	basedn     string
+	binddn     string
+	bindpw     string
+	filter     string
 }{
 	configArg: "config.json",
 }
 
-var config map[string]string
-
 func ladpAuth(username string, password string) bool {
 	var l *ldap.Conn
 	var err error
-	l, err = ldap.DialTLS("tcp", config["ldapserver"], &tls.Config{InsecureSkipVerify: true})
+
+	l, err = ldap.DialTLS("tcp", options.ldapserver, &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
-		log.Println(err)
+		log.Printf("connecting ldap server failed: %s\n", err)
+		return false
 	}
 
-	err = l.Bind(config["binddn"], config["bindpw"])
+	err = l.Bind(options.binddn, options.bindpw)
 
 	if err != nil {
-		log.Println(err)
+		log.Printf("bind failed: %s\n", err)
+		return false
 	}
 
-	filterString := fmt.Sprintf(config["filter"], username)
+	filterString := fmt.Sprintf(options.filter, username)
 	log.Println(filterString)
 
 	searchRequest := ldap.NewSearchRequest(
-		config["basedn"],
+		options.basedn,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		filterString,
 		nil,
@@ -48,7 +56,7 @@ func ladpAuth(username string, password string) bool {
 
 	searchResult, searchErr := l.Search(searchRequest)
 	if searchErr != nil {
-		log.Println(searchErr)
+		log.Printf("search failed: %s\n", searchErr)
 		return false
 	}
 
@@ -124,9 +132,44 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	flag.StringVar(&options.configArg, "config", options.configArg, "path to ldap-auth-daemon configuration file")
+	flag.StringVar(&options.host, "host", "127.0.0.1", "ip/host that bind to, default 127.0.0.1")
+	flag.IntVar(&options.port, "port", 8080, "port that bind to, default 8080")
+	flag.StringVar(&options.ldapserver, "ldapserver", "", "required. ldapserver")
+	flag.StringVar(&options.basedn, "basedn", "", "required. basedn.")
+	flag.StringVar(&options.binddn, "binddn", "", "required if search action need bind first")
+	flag.StringVar(&options.bindpw, "bindpw", "", "required if search action need bind first")
+	flag.StringVar(&options.filter, "filter", "", "required. filter template, such as (sAMAccountName=%s)")
+}
+
+func mergeConfigToOptions(config map[string]string) {
+	if options.ldapserver == "" {
+		if value, ok := config["ldapserver"]; ok {
+			options.ldapserver = value
+		} else {
+			log.Fatal("ldapserver is required")
+		}
+	}
+
+	if options.basedn == "" {
+		if value, ok := config["basedn"]; ok {
+			options.basedn = value
+		} else {
+			log.Fatal("basedn is required")
+		}
+	}
+
+	if options.filter == "" {
+		if value, ok := config["filter"]; ok {
+			options.filter = value
+		} else {
+			log.Fatal("filter is required")
+		}
+	}
 }
 
 func main() {
+	flag.Parse()
+
 	configValue, err := ioutil.ReadFile(options.configArg)
 
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
@@ -135,10 +178,15 @@ func main() {
 		log.Fatal(err)
 		return
 	}
+
+	config := map[string]string{}
 	if err := json.Unmarshal(configValue, &config); err != nil {
 		log.Fatal(err)
 	}
 
+	mergeConfigToOptions(config)
+
 	http.HandleFunc("/", authHandler)
-	http.ListenAndServe(":8080", nil)
+	log.Println(fmt.Sprintf("%s:%d", options.host, options.port))
+	http.ListenAndServe(fmt.Sprintf("%s:%d", options.host, options.port), nil)
 }
