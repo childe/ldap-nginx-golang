@@ -14,20 +14,21 @@ import (
 )
 
 var options = &struct {
-	configArg  string
-	host       string
-	port       int
-	ldapserver string
-	basedn     string
-	binddn     string
-	bindpw     string
-	filter     string
+	configArg          string
+	host               string
+	port               int
+	ldapserver         string
+	basedn             string
+	binddn             string
+	bindpw             string
+	filter             string
+	insecureSkipVerify bool
 }{
 	configArg: "config.json",
 }
 
 func ladpAuth(username string, password string) bool {
-	l, err := ldap.DialTLS("tcp", options.ldapserver, &tls.Config{InsecureSkipVerify: true})
+	l, err := ldap.DialTLS("tcp", options.ldapserver, &tls.Config{InsecureSkipVerify: options.insecureSkipVerify})
 	if err != nil {
 		log.Printf("connecting ldap server failed: %s\n", err)
 		return false
@@ -65,11 +66,6 @@ func ladpAuth(username string, password string) bool {
 	userDN := searchResult.Entries[0].DN
 	log.Println(userDN)
 
-	//attributes := sr.Entries[0].Attributes
-	//for _, attr := range attributes {
-	//log.Printf("%s: %s\n", attr.Name, attr.Values)
-	//}
-
 	err = l.Bind(userDN, password)
 	if err != nil {
 		log.Println(err)
@@ -82,7 +78,6 @@ func ladpAuth(username string, password string) bool {
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path)
 	authorization := r.Header.Get("Authorization")
-	log.Printf("original authorization: %s", authorization)
 
 	if authorization == "" {
 		w.Header().Add("WWW-Authenticate", "Basic realm=\"\"")
@@ -97,7 +92,6 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		w.Header().Add("WWW-Authenticate", "Basic realm=\"\"")
 		w.WriteHeader(401)
-		log.Println(err)
 		return
 	}
 
@@ -106,9 +100,9 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 	userANDpw := strings.SplitN(authorizationValue, ":", 2)
 	if len(userANDpw) != 2 {
+		log.Println("Authenticate Value Format Error")
 		w.Header().Add("WWW-Authenticate", "Basic realm=\"\"")
 		w.WriteHeader(401)
-		log.Println("Authenticate Value Format Error")
 		return
 	}
 
@@ -136,6 +130,7 @@ func init() {
 	flag.StringVar(&options.binddn, "binddn", "", "required if search action need bind first")
 	flag.StringVar(&options.bindpw, "bindpw", "", "required if search action need bind first")
 	flag.StringVar(&options.filter, "filter", "", "required. filter template, such as (sAMAccountName=%s)")
+	flag.BoolVar(&options.insecureSkipVerify, "insecureSkipVerify", false, "if skip verity when ldap server cert is not insecure")
 }
 
 func mergeConfigToOptions(config map[string]string) {
