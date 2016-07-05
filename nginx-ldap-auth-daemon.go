@@ -31,7 +31,7 @@ func ladpAuth(username string, password string) bool {
 	var err error
 
 	if options.useSSL {
-		l, err = ldap.DialTLS("tcp", options.ldapserver, &tls.Config{InsecureSkipVerify: options.insecureSkipVerify})
+		l, err = ldap.DialTLS("tcp", options.ldapserver, &tls.Config{ServerName: strings.SplitN(options.ldapserver, ":", 2)[0], InsecureSkipVerify: options.insecureSkipVerify})
 	} else {
 		l, err = ldap.Dial("tcp", options.ldapserver)
 	}
@@ -103,7 +103,6 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authorizationValue := string(authorizationBytes)
-	log.Printf("authorization: %s", string(authorizationBytes))
 
 	userANDpw := strings.SplitN(authorizationValue, ":", 2)
 	if len(userANDpw) != 2 {
