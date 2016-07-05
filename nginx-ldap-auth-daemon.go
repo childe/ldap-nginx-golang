@@ -97,8 +97,8 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err)
-		w.Header().Add("WWW-Authenticate", "Basic realm=\"\"")
-		w.WriteHeader(401)
+		//w.Header().Add("WWW-Authenticate", "Basic realm=\"\"")
+		w.WriteHeader(403)
 		return
 	}
 
@@ -108,7 +108,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	if len(userANDpw) != 2 {
 		log.Println("Authenticate Value Format Error")
 		w.Header().Add("WWW-Authenticate", "Basic realm=\"\"")
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		return
 	}
 
@@ -121,7 +121,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 	} else {
 		w.Header().Add("WWW-Authenticate", "Basic realm=\"\"")
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		log.Println("Auth Failed")
 	}
 	return
