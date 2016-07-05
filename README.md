@@ -1,38 +1,40 @@
 ## 安装
 
-### 从编码编译
+- 从编码编译
 
     git clone git@github.com:childe/ldap-nginx-golang.git
     cd ldap-nginx-golang
     make
 
-### 下载编译好的二进制文件
+- 或者下载编译好的二进制文件
+
 从[https://github.com/childe/ldap-nginx-golang/releases/tag/201607](https://github.com/childe/ldap-nginx-golang/releases/tag/201607)下载对应的版本
 
 ## 使用
 
-### 配置config.json
+1. 配置config.json
 
-参考 config.example.json, 配置项参考后面的ldap验证原理
+    参考 config.example.json, 配置项参考后面的ldap验证原理
 
-### 配置nginx
+2. 配置nginx
 
-    cp nginx.conf /etc/nginx
-    nginx -s reload
+        cp nginx.conf /etc/nginx
+        nginx -s reload
 
-配置可参考后面的nginx原理
+    配置可参考后面的nginx原理
 
-### 运行
+3. 运行
 
-./nginx-ldap-auth-daemon --config config.json
+        ./nginx-ldap-auth-daemon --config config.json
 
-所有参数都可以在运行时指定, 会覆盖config.json里面的值, 如下:
-./nginx-ldap-auth-daemon --host 0.0.0.0 --port 9000 --insecureSkipVerify true
+    所有参数都可以在运行时指定, 会覆盖config.json里面的值, 如下:
 
-**useSSL和insecureSkipVerify两个参数只能在运行时指定, 不能写在config.json里面, 因为我不知道golang里面怎么处理bool类型的options参数的默认值, 没办法和config.json里面的值做合并. 用interface好像也可以做, 但太麻烦了.**
+        ./nginx-ldap-auth-daemon --host 0.0.0.0 --port 9000 --insecureSkipVerify true
 
-#### 查看所有参数
-./nginx-ldap-auth-daemon --help
+    **useSSL和insecureSkipVerify两个参数只能在运行时指定, 不能写在config.json里面, 因为我不知道golang里面怎么处理bool类型的options参数的默认值, 没办法和config.json里面的值做合并. 用interface好像也可以做, 但太麻烦了.**
+
+### 查看所有参数
+    ./nginx-ldap-auth-daemon --help
 
 
 ## 原理
