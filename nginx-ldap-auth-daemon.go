@@ -178,17 +178,6 @@ func mergeConfigToOptions(config map[string]string) {
 			options.bindpw = value
 		}
 	}
-
-	if options.useSSL == "" {
-		if value, ok := config["useSSL"]; ok {
-			options.useSSL = value
-		}
-	}
-	if options.insecureSkipVerify == "" {
-		if value, ok := config["insecureSkipVerify"]; ok {
-			options.insecureSkipVerify = value
-		}
-	}
 }
 
 func main() {
