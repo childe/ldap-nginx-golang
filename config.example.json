@@ -1,0 +1,6 @@
+{
+    "basedn":"cn.global.corp.com:3269",
+    "binddn":"CN=jia.liu,OU=User,OU=OPS,OU=Sh,DC=cn,DC=global,DC=corp,DC=com",
+    "bindpw":"123456",
+    "filter":"(sAMAccountName=%s)"
+}
