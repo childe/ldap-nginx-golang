@@ -24,9 +24,7 @@ var options = &struct {
 	filter             string
 	useSSL             bool
 	insecureSkipVerify bool
-}{
-	configArg: "config.json",
-}
+}{}
 
 func ladpAuth(username string, password string) bool {
 	var l *ldap.Conn
@@ -131,7 +129,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	flag.StringVar(&options.configArg, "config", options.configArg, "path to ldap-auth-daemon configuration file")
+	flag.StringVar(&options.configArg, "config", "", "path to ldap-auth-daemon configuration file")
 	flag.StringVar(&options.host, "host", "127.0.0.1", "ip/host that bind to, default 127.0.0.1")
 	flag.IntVar(&options.port, "port", 8080, "port that bind to, default 8080")
 	flag.StringVar(&options.ldapserver, "ldapserver", "", "required. ldapserver")
@@ -148,6 +146,7 @@ func mergeConfigToOptions(config map[string]string) {
 		if value, ok := config["ldapserver"]; ok {
 			options.ldapserver = value
 		} else {
+			flag.PrintDefaults()
 			log.Fatal("ldapserver is required")
 		}
 	}
@@ -156,6 +155,7 @@ func mergeConfigToOptions(config map[string]string) {
 		if value, ok := config["basedn"]; ok {
 			options.basedn = value
 		} else {
+			flag.PrintDefaults()
 			log.Fatal("basedn is required")
 		}
 	}
@@ -164,6 +164,7 @@ func mergeConfigToOptions(config map[string]string) {
 		if value, ok := config["filter"]; ok {
 			options.filter = value
 		} else {
+			flag.PrintDefaults()
 			log.Fatal("filter is required")
 		}
 	}
@@ -182,21 +183,20 @@ func mergeConfigToOptions(config map[string]string) {
 
 func main() {
 	flag.Parse()
-
-	configValue, err := ioutil.ReadFile(options.configArg)
-
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
 
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
 	config := map[string]string{}
-	if err := json.Unmarshal(configValue, &config); err != nil {
-		log.Fatal(err)
-	}
+	if options.configArg != "" {
+		configValue, err := ioutil.ReadFile(options.configArg)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 
+		if err := json.Unmarshal(configValue, &config); err != nil {
+			log.Fatal(err)
+		}
+	}
 	mergeConfigToOptions(config)
 
 	http.HandleFunc("/", authHandler)
