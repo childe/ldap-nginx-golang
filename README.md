@@ -53,7 +53,7 @@
         proxy_pass http://backend/;
     }
 
-这个意思是说, 所以访问先转到/auth-proxy这里, /auth-proxy如果返回401或者403, 则访问被拒绝; 如果返回返回2xx, 访问允许,继续被nginx转到http://backend/; 返回其他值, 会被认为是个错误.
+这个意思是说, 所有访问先转到/auth-proxy这里, /auth-proxy如果返回401或者403, 则访问被拒绝; 如果返回2xx, 访问允许,继续被nginx转到http://backend/; 返回其他值, 会被认为是个错误.
 
 ### ldap
 
