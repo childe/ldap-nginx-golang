@@ -67,7 +67,7 @@ ldap的验证步骤为:
 
 ### 处理流程
 
-后面再写吧..
+参见[http://ohmycat.me/nginx/2016/06/28/nginx-ldap.html](http://ohmycat.me/nginx/2016/06/28/nginx-ldap.html)
 
 ## 感谢
 
