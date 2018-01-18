@@ -1,3 +1,9 @@
+## 重要
+
+这只是一个Demo, 用来学习的, 我也没有在生产环境跑过.
+
+[english readme](https://github.com/nginxinc/nginx-ldap-auth/blob/master/README.eng.md)
+
 ## 安装
 
 - 从编码编译
