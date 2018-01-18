@@ -48,7 +48,7 @@ explanation:
 
         proxy_pass http://backend/;
     }
-the config means all requests would firstly be redirected to /auth-proxy. The request will be denied if /auth-proxy return 401 or 403;  request will go on to http://backend/ if /auth-proxy return 2xx; error if /auth-proxy return other code.
+the config means all requests would firstly be redirected to /auth-proxy. The request will be denied if /auth-proxy return 401 or 403;  request will go on to http://backend/ if /auth-proxy return 2xx; Any other response code returned by the subrequest is considered an error.
 
 ### ldap
 
